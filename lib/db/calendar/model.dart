@@ -2,13 +2,20 @@ import 'package:flutter/services.dart';
 
 import 'enum.dart';
 import '../orm/utility.dart' as util;
+
 class DBModelCalendar {
   static final String modelTableName = "Calendar";
   String title, id;
   bool sync, visible, blocked;
   EnumPlatform platform;
 
-  DBModelCalendar({this.id,this.title,this.platform,this.sync,this.visible,this.blocked});
+  DBModelCalendar(
+      {this.id,
+      this.title,
+      this.platform,
+      this.sync,
+      this.visible,
+      this.blocked});
 
   static initDB() {
     return {
@@ -22,6 +29,7 @@ class DBModelCalendar {
           "blocked INTEGER DEFAULT 1);"
     };
   }
+
   static initData(db) async {
     var file_path = 'data/init_data/node_model.csv';
     var content = await rootBundle.loadString(file_path);
@@ -32,19 +40,74 @@ class DBModelCalendar {
     });
   }
 
-
   factory DBModelCalendar.fromMap(json) {
     try {
       return new DBModelCalendar(
-        id: json["id"].toString().trim(),
-        title: json["nodeName"].toString().trim(),
-        platform: json["type"].toString().trim(),
-        sync: json["macAddr"].toString().trim().toUpperCase(),
-        visible: json["visible"].toString().trim() == "1",
-        blocked: json["blocked"].toString().trim() == "1"),
-      );
+          id: json["id"].toString().trim(),
+          title: json["nodeName"].toString().trim(),
+          platform: null,
+          sync: json["sync"].toString().trim() == "1",
+          visible: json["visible"].toString().trim() == "1",
+          blocked: json["blocked"].toString().trim() == "1");
     } catch (e) {
       return null;
     }
+  }
+
+  static insert(db, DBModelCalendar obj) async {
+    await db.newObj({
+      "query":
+          "INSERT Into $DBModelCalendar (id,title,sync,visible,blocked,platform)"
+              " VALUES (?,?,?,?,?,?,?,?,?)",
+      "values": [
+        obj.id,
+        obj.title,
+        obj.sync,
+        obj.visible,
+        obj.blocked,
+        obj.platform //TODO sistemare
+      ]
+    });
+  }
+
+  static getAll(db) async {
+    var buffer = await db.getObj(modelTableName);
+    return buffer.map((c) => DBModelCalendar.fromMap(c)).toList();
+  }
+
+  static getByID(db, String idNode) async {
+    var buffer =
+        await db.getObj(modelTableName, where: "id = ?", whereArgs: [idNode]);
+    return buffer.map((c) => DBModelCalendar.fromMap(c)).toList();
+  }
+
+  static getByIDList(db, List<String> idNode) async {
+    String where = "";
+    idNode.forEach((element) {
+      where += " OR id = ?";
+    });
+    where = where.substring(4);
+    var buffer =
+        await db.getObj(modelTableName, where: where, whereArgs: idNode);
+    return buffer.map((c) => DBModelCalendar.fromMap(c)).toList();
+  }
+
+  static delete(db, {id}) async {
+    var buffer;
+    if (id == null)
+      buffer = await db.deleteAll(modelTableName);
+    else
+      buffer = await db.deleteObj(modelTableName, id: id);
+    return buffer;
+  }
+
+  static update(db, item) async {
+    var buffer = await db.updateObj(modelTableName,
+        obj: item, where: "id = ?", whereArgs: [item.id]);
+    return buffer;
+  }
+
+  Map<String, dynamic> toMap() {
+    throw UnimplementedError();
   }
 }
