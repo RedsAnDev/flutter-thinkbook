@@ -44,9 +44,9 @@ class PathDrawer extends StatelessWidget {
               }),
           ListTile(
               leading: Icon(Icons.home),
-              title: Text("Details"),
+              title: Text("Impostazioni"),
               onTap: () {
-                Navigator.popAndPushNamed(context, "/details");
+                Navigator.popAndPushNamed(context, "/settings");
               })
     ]));
   }

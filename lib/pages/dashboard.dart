@@ -62,7 +62,6 @@ class _DashboardState extends State<Dashboard> {
         drawer: widget.route,
         appBar: AppBar(
           title: Text(_title),
-          leading: Icon(Icons.title),
         ),
         body: ListView.builder(
             itemCount: dataset.length,
@@ -73,7 +72,7 @@ class _DashboardState extends State<Dashboard> {
                   child: GestureDetector(
                       onTap: () {},
                       onDoubleTap: () {},
-                      child: CardGradient()));
+                      child: Text("C")));
             }));
   }
 }
