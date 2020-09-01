@@ -159,9 +159,12 @@ class DBModelCalendar {
 class DBModelEvent extends DBMSModel {
   static final String modelTableName = "Event";
   String id, idCalendar, title;
+  DateTime datetime;
   Map payload;
 
-  DBModelEvent({this.id, this.idCalendar, this.title, this.payload}) : super();
+  DBModelEvent(
+      {this.id, this.idCalendar, this.title, this.payload, this.datetime})
+      : super();
 
   static initDB() {
     return {
@@ -170,6 +173,7 @@ class DBModelEvent extends DBMSModel {
           "id TEXT PRIMARY KEY,"
           "idCalendar TEXT NULL,"
           "title TEXT NULL,"
+          "datetime DATETIME NULL,"
           "payload BLOB NULL);"
     };
   }
@@ -190,6 +194,7 @@ class DBModelEvent extends DBMSModel {
           id: json["id"].toString().trim(),
           idCalendar: json["idCalendar"].toString().trim(),
           title: json["title"].toString().trim(),
+          datetime: json["datetime"],
           payload: json["payload"]);
     } catch (e) {
       return null;
@@ -211,11 +216,10 @@ class DBModelEvent extends DBMSModel {
       "id": this.id,
       "idCalendar": this.idCalendar,
       "title": this.title,
+      "datetime": this.datetime,
       "payload": this.payload
     };
   }
 
-  static getByCalendarID(db,obj)async{
-
-  }
+  static getByCalendarID(db, obj) async {}
 }

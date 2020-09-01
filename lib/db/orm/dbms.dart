@@ -1,8 +1,10 @@
 import 'dart:io';
+import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:path_provider/path_provider.dart';
-import 'package:path/path.dart';
 import 'package:flutter/services.dart';
+import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
 import '../calendar/_init.dart' as calendar;
@@ -84,14 +86,15 @@ class DBMSProvider {
 
   _create_file_db() async {
     Directory documentsDirectory = await getApplicationDocumentsDirectory();
-    String path = join(documentsDirectory.path, _nameDBData);
-
+    String path = join(documentsDirectory.path, "data_db_$_nameDBData");
     ///Creazione file se necessario
     if (FileSystemEntity.typeSync(path) == FileSystemEntityType.notFound) {
-      ByteData data = await rootBundle.load(path);
+      print("PATH IS $path");
+      ByteData data = await rootBundle.load(join("data/db",_nameDBData));
       List<int> bytes =
           data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
-      await new File(path).writeAsBytes(bytes);
+      var buffeR=await new File(path).writeAsBytes(bytes);
+      print(buffeR);
     }
     return path;
   }

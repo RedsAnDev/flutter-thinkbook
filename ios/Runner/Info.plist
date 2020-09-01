@@ -11,7 +11,7 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>thinkbook</string>
+	<string>contractor_agenda</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
@@ -42,6 +42,6 @@
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
 	<key>NSCalendarsUsageDescription</key>
-    <string>Accesso Calendario personale per Think Book</string>
+    <string>ThinkBook ha bisogno di gestire i calendari.</string>
 </dict>
 </plist>
