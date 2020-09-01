@@ -19,7 +19,7 @@ class App extends StatelessWidget {
       initialRoute: '/',
       routes: {
         '/': (context) => Dashboard(
-              title: "A",
+              title: "ThinkBook",
               route: drawer,
             ),
         '/settings': (context) =>
@@ -32,6 +32,7 @@ class App extends StatelessWidget {
       },
       theme: ThemeData(
         primarySwatch: Colors.blue,
+        backgroundColor: Colors.amber,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
     );

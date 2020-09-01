@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
 class PageWidget {
-  final String title = "";
-  final String path = "";
-  final IconData icon = Icons.info;
+  static final String title = "";
+  static final String path = "";
+  static final IconData icon = Icons.info;
 
   String get getTitle => title;
 
@@ -15,11 +15,11 @@ class PageWidget {
 class PageStatelessWidget extends StatelessWidget implements PageWidget {
   PageStatelessWidget({Key key}) : super(key: key);
   @override
-  final String title = "";
+  static final String title = "";
   @override
-  final String path = "";
+  static final String path = "";
   @override
-  final IconData icon = Icons.info;
+  static final IconData icon = Icons.info;
 
   @override
   String get getTitle => title;
@@ -35,7 +35,7 @@ class PageStatelessWidget extends StatelessWidget implements PageWidget {
     return Scaffold(
       appBar: AppBar(
         actions: buildAction(context),
-        title: Text(this.title),
+        title: Text(this.getTitle),
       ),
       body: buildBody(context),
     );
@@ -49,4 +49,3 @@ class PageStatelessWidget extends StatelessWidget implements PageWidget {
     return [];
   }
 }
-
