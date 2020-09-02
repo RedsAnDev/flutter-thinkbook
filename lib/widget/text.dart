@@ -61,3 +61,71 @@ Widget textBarColor(
         ],
       ));
 }
+
+Widget textFormFieldText(context,
+    {String labelText: "Nome Campo",
+    String initialValue: "",
+    bool showCursor: true,
+    String errorMessage: "L'evento deve avere un titolo",
+    Function cb,
+    String errorMessageCB}) {
+  return TextFormField(
+    decoration: InputDecoration(labelText: labelText),
+    initialValue: initialValue,
+    showCursor: showCursor,
+    validator: (String val) {
+      if (val == null || val.trim().length == 0) {
+        return errorMessage;
+      }
+      try {
+        cb(val);
+        return null;
+      } catch (e) {
+        return errorMessageCB == null ? "$e" : errorMessageCB;
+      }
+    },
+    onEditingComplete: () {
+      // DESIGN [@redsandev] non sono proprio sicuro di cosa faccia questa funzione
+      // https://stackoverflow.com/a/56946311/5930652
+      FocusScope.of(context).unfocus();
+    },
+    onSaved: (String value) => value,
+  );
+}
+
+Widget textFormFieldDateTime(context,
+    {IconData icon: Icons.calendar_today,
+    String labelText: "Data inizio evento",
+    DateTime initialValue,
+    Function cb}) {
+  return TextFormField(
+    decoration: InputDecoration(
+      icon: Icon(icon),
+      labelText: labelText,
+      hintText: "dd/mm/yyyy [HH:MM[:SS]]",
+    ),
+    initialValue: (initialValue == null ? DateTime.now() : initialValue)
+        .toLocal()
+        .toString()
+        .split(".")[0],
+    showCursor: true,
+    validator: (String val) {
+      if (val == null || val.trim().length == 0) {
+        return "L'evento deve avere una data di inizio";
+      }
+      try {
+        cb(val);
+        return null;
+      } catch (e) {
+        print(e);
+        return "Data non corretta, controlla il formato";
+      }
+    },
+    onEditingComplete: () {
+      // DESIGN [@redsandev] non sono proprio sicuro di cosa faccia questa funzione
+      // https://stackoverflow.com/a/56946311/5930652
+      FocusScope.of(context).unfocus();
+    },
+    onSaved: (String value) => value,
+  );
+}

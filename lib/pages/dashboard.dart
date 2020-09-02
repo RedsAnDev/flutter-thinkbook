@@ -4,6 +4,7 @@ import 'package:thinkbook/db/orm/_init.dart';
 import 'package:thinkbook/widget/page_simple.dart';
 import 'package:thinkbook/widget/route.dart';
 import 'package:flutter/material.dart';
+import 'package:thinkbook/widget/text.dart';
 import 'package:uuid/uuid.dart';
 import 'package:uuid/uuid_util.dart';
 
@@ -12,15 +13,6 @@ class Dashboard extends StatefulWidget {
   final PathDrawer route;
 
   Dashboard({Key key, this.title, this.route}) : super(key: key);
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
 
   @override
   _DashboardState createState() => _DashboardState();
@@ -35,12 +27,16 @@ class _DashboardState extends State<Dashboard> {
   final GlobalKey<FormState> keyForm = GlobalKey<FormState>();
   final DeviceCalendarPlugin _deviceCalendarPlugin = DeviceCalendarPlugin();
 
+  final GlobalKey keyScheduleboardPast = GlobalKey();
+  final GlobalKey keyScheduleboardFuture = GlobalKey();
+
   @override
   void initState() {
     super.initState();
     _title = widget.title;
     _boards = <PageWidget>[
       Scheduleboard(
+        key: keyScheduleboardPast,
         icon: Icons.arrow_back,
         title: "Eventi passati",
         path: "events_passed",
@@ -48,9 +44,11 @@ class _DashboardState extends State<Dashboard> {
       ),
       Homeboard(),
       Scheduleboard(
+        key: keyScheduleboardFuture,
         icon: Icons.arrow_forward,
         title: "Eventi futuri",
         path: "events_incoming",
+        from_today: true,
       )
     ];
     _tabs = _boards
@@ -75,7 +73,8 @@ class _DashboardState extends State<Dashboard> {
           title: Text(_title),
           actions: [
             StreamBuilder(
-                stream: Homeboard.getAll().asStream(),
+                stream: DBModelCalendar.getAll(DBMSProvider.db).asStream(),
+                // stream: Homeboard.getAll().asStream(),
                 builder: (BuildContext context, AsyncSnapshot snapshot) {
                   if (snapshot.hasError || !snapshot.hasData)
                     return IconButton(
@@ -142,87 +141,29 @@ class _DashboardState extends State<Dashboard> {
                               model.idCalendar = value;
                             },
                           ),
-                          TextFormField(
-                            decoration:
-                                InputDecoration(labelText: "Titolo evento"),
-                            initialValue: "",
-                            showCursor: true,
-                            validator: (String val) {
-                              if (val == null || val.trim().length == 0) {
-                                return "L'evento deve avere un titolo";
-                              }
-                              model.title = val;
-                              return null;
-                            },
-                            onEditingComplete: () {
-                              // DESIGN [@redsandev] non sono proprio sicuro di cosa faccia questa funzione
-                              // https://stackoverflow.com/a/56946311/5930652
-                              FocusScope.of(context).unfocus();
-                            },
-                            onSaved: (String value) => value,
-                          ),
-                          TextFormField(
-                            decoration: InputDecoration(
-                              icon: Icon(Icons.calendar_today),
+                          textFormFieldText(context,
+                              labelText: "Titolo evento",
+                              showCursor: true,
+                              errorMessage: "L'evento deve avere un titolo",
+                              initialValue: "",
+                              errorMessageCB: "Errore, valore non corretto",
+                              cb: (val) {
+                            model.title = val;
+                          }),
+                          textFormFieldDateTime(context,
+                              icon: Icons.calendar_today,
                               labelText: "Data inizio evento",
-                              hintText: "dd/mm/yyyy [HH:MM[:SS]]",
-                            ),
-                            initialValue: DateTime.now()
-                                .toLocal()
-                                .toString()
-                                .split(".")[0],
-                            showCursor: true,
-                            validator: (String val) {
-                              if (val == null || val.trim().length == 0) {
-                                return "L'evento deve avere una data di inizio";
-                              }
-                              try {
-                                model.dt_start = DateTime.parse(val);
-                                return null;
-                              } catch (e) {
-                                print(e);
-                                return "Data non corretta, controlla il formato";
-                              }
-                            },
-                            onEditingComplete: () {
-                              // DESIGN [@redsandev] non sono proprio sicuro di cosa faccia questa funzione
-                              // https://stackoverflow.com/a/56946311/5930652
-                              FocusScope.of(context).unfocus();
-                            },
-                            onSaved: (String value) => value,
-                          ),
-                          TextFormField(
-                            decoration: InputDecoration(
-                              icon: Icon(Icons.calendar_today),
+                              initialValue: DateTime.now(), cb: (val) {
+                            model.dt_start = DateTime.parse(val);
+                          }),
+                          textFormFieldDateTime(context,
+                              icon: Icons.calendar_today,
                               labelText: "Data fine evento",
-                              hintText: "dd/mm/yyyy [HH:MM[:SS]]",
-                            ),
-                            initialValue: DateTime.fromMillisecondsSinceEpoch(
-                                    DateTime.now().millisecondsSinceEpoch +
-                                        1000 * 15 * 60)
-                                .toLocal()
-                                .toString()
-                                .split(".")[0],
-                            showCursor: true,
-                            validator: (String val) {
-                              if (val == null || val.trim().length == 0) {
-                                return "L'evento deve avere una data di inizio";
-                              }
-                              try {
-                                model.dt_end = DateTime.parse(val);
-                                return null;
-                              } catch (e) {
-                                print(e);
-                                return "Data non corretta, controlla il formato";
-                              }
-                            },
-                            onEditingComplete: () {
-                              // DESIGN [@redsandev] non sono proprio sicuro di cosa faccia questa funzione
-                              // https://stackoverflow.com/a/56946311/5930652
-                              FocusScope.of(context).unfocus();
-                            },
-                            onSaved: (String value) => value,
-                          ),
+                              initialValue: DateTime.fromMillisecondsSinceEpoch(
+                                  DateTime.now().millisecondsSinceEpoch +
+                                      1000 * 15 * 60), cb: (val) {
+                            model.dt_end = DateTime.parse(val);
+                          }),
                           IconButton(
                               icon: Icon(Icons.send),
                               tooltip: "Save data",
@@ -281,6 +222,7 @@ class Homeboard extends StatefulWidget implements PageWidget {
   @override
   String get getTitle => title;
 
+  // TODO DESIGN TO DELETE
   static Future getAll() {
     return DBModelCalendar.getAll(DBMSProvider.db);
   }
@@ -289,7 +231,6 @@ class Homeboard extends StatefulWidget implements PageWidget {
 class _HomeboardState extends State<Homeboard> {
   @override
   Widget build(BuildContext context) {
-    // ignore: unnecessary_statements
     return FutureBuilder(
         future: DBModelCalendar.getAll(DBMSProvider.db),
         builder: (BuildContext context, AsyncSnapshot snapshot) {
@@ -305,12 +246,30 @@ class _HomeboardState extends State<Homeboard> {
               itemCount: dataset.length,
               itemBuilder: (BuildContext context, int index) {
                 DBModelCalendar item = dataset[index];
-                print(item.getSync);
+                Row iconStatus = Row(children: [
+                  Icon(
+                    item.getSync ? Icons.sync : Icons.sync_disabled,
+                    size: 16,
+                    color: item.getSync ? Colors.green : Colors.amber[900],
+                  ),
+                  Icon(
+                      item.getVisible ? Icons.visibility : Icons.visibility_off,
+                      size: 16,
+                      color: item.getVisible ? Colors.green : Colors.grey),
+                  Icon(
+                      item.getBlocked
+                          ? Icons.event_busy
+                          : Icons.event_available,
+                      size: 16,
+                      color: item.getBlocked ? Colors.red : Colors.green)
+                ]);
                 return ListTile(
                   title: Text(item.getTitle),
-                  subtitle: FutureBuilder(
-                      future: DBModelEvent.getByCalendarID(
-                          DBMSProvider.db, item.id),
+                  subtitle: iconStatus,
+                  trailing: StreamBuilder(
+                      stream:
+                          DBModelEvent.getByCalendarID(DBMSProvider.db, item.id)
+                              .asStream(),
                       builder: (BuildContext context, AsyncSnapshot snapshot) {
                         String message;
                         if (snapshot.hasError)
@@ -321,16 +280,27 @@ class _HomeboardState extends State<Homeboard> {
                         if (message != null) return Text(message);
                         List dataset = snapshot.data;
                         List<DBModelEvent> past = dataset
-                            .where((event) => event.datetime < DateTime.now())
+                            .map((e) {
+                              return DBModelEvent.fromMap(e);
+                            })
+                            .where((event) =>
+                                event.dt_end.millisecondsSinceEpoch <
+                                DateTime.now().millisecondsSinceEpoch)
                             .toList();
                         List<DBModelEvent> fromnow = dataset
-                            .where((event) => event.datetime >= DateTime.now())
+                            .map((e) {
+                              return DBModelEvent.fromMap(e);
+                            })
+                            .where((event) =>
+                                event.dt_end.millisecondsSinceEpoch >=
+                                DateTime.now().millisecondsSinceEpoch)
                             .toList();
                         return Text(
                             "Eventi riscontrati ${past.length}/${fromnow.length}");
                       }),
                   onTap: () {
                     //TODO aggiornamento
+                    setState(() {});
                   },
                   onLongPress: () async {
                     //TODO testare
@@ -345,7 +315,7 @@ class _HomeboardState extends State<Homeboard> {
 }
 
 class Scheduleboard extends StatefulWidget implements PageWidget {
-  bool from_today = true;
+  bool from_today;
   @override
   final IconData icon;
   @override
@@ -370,21 +340,109 @@ class Scheduleboard extends StatefulWidget implements PageWidget {
 }
 
 class _Scheduleboard extends State<Scheduleboard> {
+  bool from_today = true;
+
+  @override
+  void initState() {
+    super.initState();
+    this.from_today =
+        widget.from_today != null ? widget.from_today : this.from_today;
+  }
+
   @override
   Widget build(BuildContext context) {
+    this.from_today =
+        widget.from_today != null ? widget.from_today : this.from_today;
     return StreamBuilder(
-        stream: null,
+        stream: DBModelEvent.getAllEvents(DBMSProvider.db).asStream(),
         builder: (BuildContext context, AsyncSnapshot snapshot) {
           if (snapshot.hasError)
             return Center(
                 child: Text("Spiacente, ci sono dei problemi con il DB"));
           if (!snapshot.hasData)
             return Center(child: Text("Nessun evento disponibile"));
-          List buffer = snapshot.data;
+          List<DBModelEvent> buffer = (snapshot.data as List).map((e) {
+            return DBModelEvent.fromMap(e);
+          }).where((event) {
+            if (!this.from_today &&
+                (event.dt_end.millisecondsSinceEpoch <
+                    DateTime.now().millisecondsSinceEpoch))
+              return true;
+            else if (this.from_today &&
+                (event.dt_end.millisecondsSinceEpoch >=
+                    DateTime.now().millisecondsSinceEpoch)) return true;
+            return false;
+          }).toList();
           return ListView.builder(
+              itemCount: buffer.length,
               itemBuilder: (BuildContext context, int index) {
-            return Text(buffer[index].toString());
-          });
+                return eventCard(context, buffer[index]);
+              });
         });
+  }
+
+  Widget eventCard(BuildContext context, DBModelEvent event) {
+    return Card(
+      color: Colors.white,
+      child: Padding(
+          padding: EdgeInsets.all(16),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Row(children: [
+                Icon(Icons.bubble_chart),
+                Text(
+                  event.title,
+                  style: TextStyle(fontSize: 24),
+                )
+              ]),
+              SizedBox(height: 16),
+              FutureBuilder(
+                  future: DBModelCalendar.getByID(
+                      DBMSProvider.db, event.idCalendar),
+                  builder: (BuildContext context, AsyncSnapshot snapshot) {
+                    if (snapshot.hasError)
+                      return Text("Nessun calendario disponibile");
+                    if (!snapshot.hasData || snapshot.data.length == 0)
+                      return Text("Nessun calendario associato");
+                    DBModelCalendar dataset = snapshot.data[0];
+                    return Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          Row(children: [
+                            Icon(Icons.calendar_today),
+                            Text(
+                              dataset.title,
+                            )
+                          ]),
+                          Row(children: [
+                            Icon(dataset.synced
+                                ? Icons.sync
+                                : Icons.sync_disabled),
+                            Text(dataset.synced
+                                ? "Sincronizzato"
+                                : "Non Sincronizzato")
+                          ]),
+                          Row(children: [
+                            Icon(dataset.visible
+                                ? Icons.visibility
+                                : Icons.visibility_off),
+                            Text(dataset.visible ? "Visibile" : "Non Visibile")
+                          ])
+                        ]);
+                  }),
+              SizedBox(height: 16),
+              Row(
+                children: [
+                  Text(event.dt_start.toLocal().toString().split(".")[0]),
+                  Text(event.dt_end.toLocal().toString().split(".")[0])
+                ],
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                crossAxisAlignment: CrossAxisAlignment.center,
+              ),
+            ],
+          )),
+    );
   }
 }

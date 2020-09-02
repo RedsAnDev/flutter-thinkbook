@@ -109,6 +109,40 @@ class _CardGradient extends State<CardGradient> {
   }
 }
 
+Widget CardImageDefault() {
+  return Card(
+    color: Colors.white,
+    child: Padding(
+        padding: EdgeInsets.all(16),
+        child: Column(
+          children: [
+            Row(children: [
+              Icon(Icons.bubble_chart),
+              Text(
+                "Title of journey",
+                style: TextStyle(fontSize: 24),
+              )
+            ]),
+            Image.network(
+              "https://googleflutter.com/sample_image.jpg.",
+              alignment: Alignment.center,
+              height: 100,
+              cacheHeight: 100,
+              repeat: ImageRepeat.noRepeat,
+            ),
+            Row(
+              children: [Text("2020 01 01 20:30")],
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [Text("B"), Text("B"), Text("B"), Text("B")],
+            ),
+          ],
+        )),
+  );
+}
+
 Widget CardDefault() {
   return Card(
     color: Colors.white,

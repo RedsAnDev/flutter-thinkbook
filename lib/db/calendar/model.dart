@@ -159,11 +159,16 @@ class DBModelCalendar {
 class DBModelEvent extends DBMSModel {
   static final String modelTableName = "Event";
   String id, idCalendar, title;
-  DateTime dt_start,dt_end;
+  DateTime dt_start, dt_end;
   Map payload;
 
   DBModelEvent(
-      {this.id, this.idCalendar, this.title, this.payload, this.dt_start,this.dt_end})
+      {this.id,
+      this.idCalendar,
+      this.title,
+      this.payload,
+      this.dt_start,
+      this.dt_end})
       : super();
 
   static initDB() {
@@ -196,7 +201,11 @@ class DBModelEvent extends DBMSModel {
           idCalendar: json["idCalendar"].toString().trim(),
           title: json["title"].toString().trim(),
           dt_start: DateTime.parse(json["dt_start"]),
-          dt_end: json["dt_end"]!=null?DateTime.parse(json["dt_end"]):DateTime.fromMillisecondsSinceEpoch(DateTime.parse(json["dt_start"]).millisecondsSinceEpoch+1000*60*15),
+          dt_end: json["dt_end"] != null
+              ? DateTime.parse(json["dt_end"])
+              : DateTime.fromMillisecondsSinceEpoch(
+                  DateTime.parse(json["dt_start"]).millisecondsSinceEpoch +
+                      1000 * 60 * 15),
           payload: json["payload"]);
     } catch (e) {
       return null;
@@ -204,12 +213,20 @@ class DBModelEvent extends DBMSModel {
   }
 
   @override
-  static insert(db,DBModelEvent obj) async {
+  static insert(db, DBModelEvent obj) async {
     print(obj.dt_end);
     await db.newObj({
-      "query": "INSERT Into $modelTableName (id,idCalendar,title,dt_start,dt_end,payload)"
-          " VALUES (?,?,?,?,?,?)",
-      "values": [obj.id, obj.idCalendar, obj.title, obj.dt_start.toString(),obj.dt_end.toString(),obj.payload]
+      "query":
+          "INSERT Into $modelTableName (id,idCalendar,title,dt_start,dt_end,payload)"
+              " VALUES (?,?,?,?,?,?)",
+      "values": [
+        obj.id,
+        obj.idCalendar,
+        obj.title,
+        obj.dt_start.toString(),
+        obj.dt_end.toString(),
+        obj.payload
+      ]
     });
   }
 
@@ -225,5 +242,12 @@ class DBModelEvent extends DBMSModel {
     };
   }
 
-  static getByCalendarID(db, obj) async {}
+  static Future getAllEvents(db) async {
+    return await db.getObj(modelTableName);
+  }
+
+  static getByCalendarID(db, String id) async {
+    return await db
+        .getObj(modelTableName, where: "idCalendar = ?", whereArgs: [id]);
+  }
 }
