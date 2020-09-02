@@ -47,7 +47,6 @@ class DBMSProvider {
       final sql = functionInit();
       final db = dbObj != null ? dbObj : await obj.database;
       try {
-        print(sql);
         print("Tentativo drop table ${sql["table"]}");
         var test_2 = await db.rawQuery("DROP TABLE ${sql["table"]}");
       } catch (e) {
@@ -89,12 +88,10 @@ class DBMSProvider {
 
     ///Creazione file se necessario
     if (FileSystemEntity.typeSync(path) == FileSystemEntityType.notFound) {
-      print("PATH IS $path");
       ByteData data = await rootBundle.load(join("data/db", _nameDBData));
       List<int> bytes =
           data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
       var buffeR = await new File(path).writeAsBytes(bytes);
-      print(buffeR);
     }
     return path;
   }
@@ -106,7 +103,6 @@ class DBMSProvider {
   }
 
   newObj(Map kwargs) async {
-    print("KWARGS IS $kwargs");
     if (kwargs["query"] == null || kwargs["values"] == null) return null;
     final db = await database;
     var raw = await db.rawInsert(kwargs["query"], kwargs["values"]);

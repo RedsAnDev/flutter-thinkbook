@@ -114,17 +114,17 @@ class _StateConnectCalendarView extends State<ConnectCalendarView> {
   void _retrieveCalendars() async {
     try {
       var permissionsGranted = await _deviceCalendarPlugin.hasPermissions();
-      print("RETRIEVE CAL");
+      //print("RETRIEVE CAL");
       if (permissionsGranted.isSuccess && !permissionsGranted.data) {
-        print("PERMISSION OK BUT NO DAT");
+        //print("PERMISSION OK BUT NO DAT");
         permissionsGranted = await _deviceCalendarPlugin.requestPermissions();
         if (!permissionsGranted.isSuccess || !permissionsGranted.data) {
-          print("WHAT!");
+          //print("WHAT!");
           return;
         }
       }
       final calendarResult = await _deviceCalendarPlugin.retrieveCalendars();
-      print("CALENDAR RES $calendarResult");
+      //print("CALENDAR RES \nDATA${calendarResult.data}\nError\n${calendarResult.errorMessages}");
       setState(() {
         _calendars = calendarResult?.data;
       });

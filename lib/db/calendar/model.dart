@@ -66,7 +66,7 @@ class DBModelCalendar {
           visible: json["visible"].toString().trim() == "1",
           blocked: json["blocked"].toString().trim() == "1");
     } catch (e) {
-      print("ERRORE DEL CAZZO $e");
+      print("ERRORE $e");
       return null;
     }
   }
@@ -158,9 +158,10 @@ class DBModelCalendar {
 
 class DBModelEvent extends DBMSModel {
   static final String modelTableName = "Event";
+  static final String tagBase = "#ThinkBook";
   String id, idCalendar, title;
   DateTime dt_start, dt_end;
-  Map payload;
+  String payload;
 
   DBModelEvent(
       {this.id,
@@ -180,7 +181,7 @@ class DBModelEvent extends DBMSModel {
           "title TEXT NULL,"
           "dt_start DATETIME NULL,"
           "dt_end DATETIME NULL,"
-          "payload BLOB NULL);"
+          "payload TEXT NULL);"
     };
   }
 
@@ -206,7 +207,9 @@ class DBModelEvent extends DBMSModel {
               : DateTime.fromMillisecondsSinceEpoch(
                   DateTime.parse(json["dt_start"]).millisecondsSinceEpoch +
                       1000 * 60 * 15),
-          payload: json["payload"]);
+          payload: json["payload"].toString().contains(tagBase) == -1
+              ? "$tagBase ${json["payload"].toString()}"
+              : json["payload"].toString());
     } catch (e) {
       return null;
     }
@@ -214,7 +217,6 @@ class DBModelEvent extends DBMSModel {
 
   @override
   static insert(db, DBModelEvent obj) async {
-    print(obj.dt_end);
     await db.newObj({
       "query":
           "INSERT Into $modelTableName (id,idCalendar,title,dt_start,dt_end,payload)"
@@ -228,6 +230,31 @@ class DBModelEvent extends DBMSModel {
         obj.payload
       ]
     });
+  }
+
+  static update(db, DBModelEvent item) async {
+    var buffer = await db.updateObj(modelTableName,
+        obj: item, where: "id = ?", whereArgs: [item.id]);
+    return buffer;
+  }
+
+  static updateOrCreate(db, DBModelEvent item) async {
+    var buffer =
+        await db.getObj(modelTableName, where: "id = ?", whereArgs: [item.id]);
+    if (buffer.length == 0)
+      return insert(db, item);
+    else
+      return update(db, item);
+  }
+
+  static delete(db, {id}) async {
+    var buffer;
+    if (id == null)
+      buffer = await db.deleteAll(modelTableName);
+    else
+      buffer =
+          await db.deleteObj(modelTableName, where: "id = ?", whereArgs: [id]);
+    return buffer;
   }
 
   @override

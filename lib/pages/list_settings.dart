@@ -4,6 +4,7 @@ import 'package:thinkbook/widget/page_simple.dart';
 import 'settings/connectCalendar.dart';
 import 'package:thinkbook/widget/route.dart';
 import 'package:flutter/material.dart';
+import 'package:path/path.dart';
 
 class ListSettingsView extends StatelessWidget {
   List<dynamic> settingsOptions = [ConnectCalendarView()];
@@ -11,7 +12,7 @@ class ListSettingsView extends StatelessWidget {
   ListSettingsView({Key key, this.title, this.route}) : super(key: key);
 
   final String title;
-  final String path = "/settings";
+  static final String path = "/settings";
   final PathDrawer route;
 
   @override
@@ -51,14 +52,14 @@ class ListSettingsView extends StatelessWidget {
                   children: [Icon(settingOption.getIcon)],
                 ),
                 onTap: () {
-                  Navigator.pushNamed(
-                      context, this.path + settingOption.getPath);
+                  Navigator.pushNamed(context,
+                      join(ListSettingsView.path, settingOption.getPath));
                 },
               );
             } else if (settingsOptions[index].runtimeType == ListTile)
               return settingsOptions[index] as ListTile;
             else
-              return Text("No");
+              return Text("Nessuna impostazione disponibile");
           }),
     );
   }

@@ -4,6 +4,7 @@ import 'package:thinkbook/pages/settings/connectCalendar.dart';
 import 'package:thinkbook/widget/route.dart';
 import 'package:flutter/material.dart';
 import './pages/dashboard.dart';
+import "package:path/path.dart";
 
 void main() {
   runApp(App());
@@ -15,23 +16,21 @@ class App extends StatelessWidget {
   Widget build(BuildContext context) {
     PathDrawer drawer = PathDrawer();
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'ThinkBook',
       initialRoute: '/',
       routes: {
         '/': (context) => Dashboard(
               title: "ThinkBook",
               route: drawer,
             ),
-        '/settings': (context) =>
+        ListSettingsView.path: (context) =>
             ListSettingsView(title: "Impostazioni", route: drawer),
-        '/settings/calendar/connect': (context) => ConnectCalendarView(),
-        '/details': (context) => DetailView(
-              title: "B",
-              route: drawer,
-            )
+        join(ListSettingsView.path, ConnectCalendarView.path): (context) =>
+            ConnectCalendarView(),
+    join(ListSettingsView.path,DetailView.path): (context) => DetailView()
       },
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        primarySwatch: Colors.teal,
         backgroundColor: Colors.amber,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
