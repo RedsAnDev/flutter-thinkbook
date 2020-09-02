@@ -159,11 +159,11 @@ class DBModelCalendar {
 class DBModelEvent extends DBMSModel {
   static final String modelTableName = "Event";
   String id, idCalendar, title;
-  DateTime datetime;
+  DateTime dt_start,dt_end;
   Map payload;
 
   DBModelEvent(
-      {this.id, this.idCalendar, this.title, this.payload, this.datetime})
+      {this.id, this.idCalendar, this.title, this.payload, this.dt_start,this.dt_end})
       : super();
 
   static initDB() {
@@ -173,7 +173,8 @@ class DBModelEvent extends DBMSModel {
           "id TEXT PRIMARY KEY,"
           "idCalendar TEXT NULL,"
           "title TEXT NULL,"
-          "datetime DATETIME NULL,"
+          "dt_start DATETIME NULL,"
+          "dt_end DATETIME NULL,"
           "payload BLOB NULL);"
     };
   }
@@ -183,7 +184,7 @@ class DBModelEvent extends DBMSModel {
     var content = await rootBundle.loadString(file_path);
     util.clusterDataset obj = util.clusterDataset.formatCSV(content);
     obj.dataset["src"].keys.forEach((k) {
-      DBModelCalendar buffer = DBModelCalendar.fromMap(obj.dataset["src"][k]);
+      DBModelEvent buffer = DBModelEvent.fromMap(obj.dataset["src"][k]);
       insert(db, buffer);
     });
   }
@@ -194,7 +195,8 @@ class DBModelEvent extends DBMSModel {
           id: json["id"].toString().trim(),
           idCalendar: json["idCalendar"].toString().trim(),
           title: json["title"].toString().trim(),
-          datetime: json["datetime"],
+          dt_start: DateTime.parse(json["dt_start"]),
+          dt_end: json["dt_end"]!=null?DateTime.parse(json["dt_end"]):DateTime.fromMillisecondsSinceEpoch(DateTime.parse(json["dt_start"]).millisecondsSinceEpoch+1000*60*15),
           payload: json["payload"]);
     } catch (e) {
       return null;
@@ -202,11 +204,12 @@ class DBModelEvent extends DBMSModel {
   }
 
   @override
-  static insert(db, obj) async {
+  static insert(db,DBModelEvent obj) async {
+    print(obj.dt_end);
     await db.newObj({
-      "query": "INSERT Into $modelTableName (id,idCalendar,title)"
-          " VALUES (?,?,?,?)",
-      "values": [obj.id, obj.idCalendar, obj.title, obj.payload]
+      "query": "INSERT Into $modelTableName (id,idCalendar,title,dt_start,dt_end,payload)"
+          " VALUES (?,?,?,?,?,?)",
+      "values": [obj.id, obj.idCalendar, obj.title, obj.dt_start.toString(),obj.dt_end.toString(),obj.payload]
     });
   }
 
@@ -216,7 +219,8 @@ class DBModelEvent extends DBMSModel {
       "id": this.id,
       "idCalendar": this.idCalendar,
       "title": this.title,
-      "datetime": this.datetime,
+      "dt_start": this.dt_start.toString(),
+      "dt_end": this.dt_end.toString(),
       "payload": this.payload
     };
   }

@@ -17,18 +17,18 @@ class ListSettingsView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     settingsOptions.add(singleOption(
-        title: "Inizializza DB",
-        icon: Icons.upgrade,
-        context: context,
-        onTap: () async {
-          await DBMSProvider.db.initDB();
-        }));
-    settingsOptions.add(singleOption(
-        title: "Rimuovi DB",
+        title: "Ricrea DB",
         icon: Icons.upgrade,
         context: context,
         onTap: () async {
           await DBMSProvider.db.clearDB(DBMSProvider.db);
+        }));
+    settingsOptions.add(singleOption(
+        title: "Inizializza DB",
+        icon: Icons.upgrade,
+        context: context,
+        onTap: () async {
+          await DBMSProvider.db.initDB(recreate: true);
         }));
     return Scaffold(
       drawer: this.route,

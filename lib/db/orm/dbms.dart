@@ -10,15 +10,14 @@ import 'package:sqflite/sqflite.dart';
 import '../calendar/_init.dart' as calendar;
 
 class DBMSProvider {
-  static final List initEntity = [calendar.DBModelCalendar.initDB];
-  static final List initDataset = [calendar.DBModelCalendar.initData];
+  /// record per la creazione delle tabelle
+  static final List initEntity = [calendar.DBModelCalendar.initDB,calendar.DBModelEvent.initDB];
+  /// record per l'inizializzazione delle tabelle
+  static final List initDataset = [calendar.DBModelCalendar.initData,calendar.DBModelEvent.initData];
 
   static final String _nameDBData = "core.db";
   static final DBMSProvider db = DBMSProvider._();
-
   Database _database;
-
-  DBMSProvider();
 
   DBMSProvider._();
 
@@ -29,24 +28,24 @@ class DBMSProvider {
     return _database;
   }
 
-  // Creazione DB e tabelle
-  initDB() async {
-    String path=await _create_file_db();
+  // Creazione oggetto Database in App: solo se non esiste viene creato, altrimenti è necessario settare recreate su true per inizializzarlo da zero
+  initDB({bool recreate: false}) async {
+    String path = await _create_file_db();
     return await openDatabase(path, version: 1, onOpen: (Database db) async {
-      await clearDB(null,dbObj:db);
-    }, onCreate: (Database db, int version) async{
+      if (recreate) await clearDB(null, dbObj: db);
+    }, onCreate: (Database db, int version) async {
       await _createDB(db);
     });
   }
 
   /// Utility interna per eliminare il database
-  _dropTableDB(obj, {Database dbObj,forceCreateFile: false}) async {
+  _dropTableDB(obj, {Database dbObj, forceCreateFile: false}) async {
     if (forceCreateFile) {
       var path = await _create_file_db();
     }
     initEntity.forEach((functionInit) async {
-      final sql=functionInit();
-      final db = dbObj!=null?dbObj:await obj.database;
+      final sql = functionInit();
+      final db = dbObj != null ? dbObj : await obj.database;
       try {
         print(sql);
         print("Tentativo drop table ${sql["table"]}");
@@ -61,8 +60,8 @@ class DBMSProvider {
   _createDB(obj, {Database dbObj}) async {
     bool create;
     initEntity.forEach((functionInit) async {
-      final sql=functionInit();
-      final db = dbObj!=null?dbObj:await obj.database;
+      final sql = functionInit();
+      final db = dbObj != null ? dbObj : await obj.database;
       try {
         await db.rawQuery("SELECT * FROM ${sql["table"]} LIMIT 1");
         create = false;
@@ -87,21 +86,23 @@ class DBMSProvider {
   _create_file_db() async {
     Directory documentsDirectory = await getApplicationDocumentsDirectory();
     String path = join(documentsDirectory.path, "data_db_$_nameDBData");
+
     ///Creazione file se necessario
     if (FileSystemEntity.typeSync(path) == FileSystemEntityType.notFound) {
       print("PATH IS $path");
-      ByteData data = await rootBundle.load(join("data/db",_nameDBData));
+      ByteData data = await rootBundle.load(join("data/db", _nameDBData));
       List<int> bytes =
           data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
-      var buffeR=await new File(path).writeAsBytes(bytes);
+      var buffeR = await new File(path).writeAsBytes(bytes);
       print(buffeR);
     }
     return path;
   }
+
   /// Rimuove tutte le tabelle presenti e le ricrea
-  clearDB(db,{Database dbObj}) async {
-    await _dropTableDB(db,dbObj: dbObj, forceCreateFile: true);
-    await _createDB(db,dbObj: dbObj);
+  clearDB(db, {Database dbObj}) async {
+    await _dropTableDB(db, dbObj: dbObj, forceCreateFile: true);
+    await _createDB(db, dbObj: dbObj);
   }
 
   newObj(Map kwargs) async {
